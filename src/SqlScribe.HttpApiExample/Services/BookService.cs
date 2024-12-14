@@ -85,7 +85,8 @@ public class BookService : IBookService
         return (await conn.QueryAsync<Book>(query.Sql, query.Parameters)).ToList();
     }
 
-    public async Task<IList<BookSlimResponse>> GetAllByMinimumPriceAsync(decimal price, CancellationToken ct)
+    public async Task<IList<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
+        CancellationToken ct)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync(ct);
         var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder();
@@ -99,11 +100,16 @@ public class BookService : IBookService
                 new GroupByClause<Book, string>(x => x.Title),
                 new GroupByClause<Book, decimal>(x => x.Price)
             )
-            .Having(
+            .AndHaving<Book>(
                 new HavingClause<Book, decimal>(AggregateFunction.Min, x => x.Price,
-                    SqlOperator.GreaterThanOrEqual, price)
+                    SqlOperator.GreaterThanOrEqual, lowerBound),
+                new HavingClause<Book, decimal>(AggregateFunction.Max, x => x.Price,
+                    SqlOperator.LessThanOrEqual, upperBound)
             )
+            .OrderByAsc<Book, decimal>(x => x.Price)
             .Build<Book>();
+
+        query.Dump();
 
         return (await conn.QueryAsync<BookSlimResponse>(new CommandDefinition(query.Sql, query.Parameters,
             cancellationToken: ct))).ToList();

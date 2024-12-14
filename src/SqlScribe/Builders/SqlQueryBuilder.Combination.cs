@@ -20,14 +20,14 @@ public partial class SqlQueryBuilder
         foreach (var item in clauses)
         {
             var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
-            _groupByQueue.Enqueue($" {tableName}.{columnName} ");
+            _groupByQueue.Enqueue($"{tableName}.{columnName}");
         }
 
         return this;
     }
 
-    public SqlQueryBuilder Join<TPrimary, TJoined, TParenTValue, TChildValue>(SqlJoinType sqlJoinType,
-        Expression<Func<TPrimary, TParenTValue>> fromKey, Expression<Func<TJoined, TChildValue>> toKey)
+    public SqlQueryBuilder Join<TPrimary, TJoined, TPrimaryValue, TJoinedValue>(SqlJoinType sqlJoinType,
+        Expression<Func<TPrimary, TPrimaryValue>> fromKey, Expression<Func<TJoined, TJoinedValue>> toKey)
     {
         var joinTypeString = sqlJoinType switch
         {

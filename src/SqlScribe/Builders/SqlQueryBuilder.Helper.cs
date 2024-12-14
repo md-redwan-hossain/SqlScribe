@@ -24,6 +24,7 @@ public partial class SqlQueryBuilder
             SqlOperator.GreaterThanOrEqual => ">=",
             SqlOperator.LessThanOrEqual => "<=",
             SqlOperator.NotEqual => "<>",
+            SqlOperator.Like => "LIKE",
             _ => throw new NotSupportedException($"Operator {sqlOperator} is not supported.")
         };
     }
@@ -65,6 +66,7 @@ public partial class SqlQueryBuilder
         return _databaseVendor switch
         {
             DatabaseVendor.PostgreSql => $"\"{text}\"",
+            DatabaseVendor.SqLite => $"\"{text}\"",
             DatabaseVendor.MySql => $"`{text}`",
             DatabaseVendor.SqlServer => $"[{text}]",
             _ => text

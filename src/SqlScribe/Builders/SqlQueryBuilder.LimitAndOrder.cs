@@ -4,7 +4,7 @@ namespace SqlScribe.Builders;
 
 public partial class SqlQueryBuilder
 {
-    public SqlQueryBuilder OrderBy<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector)
+    public SqlQueryBuilder OrderByAsc<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector)
     {
         var tableName = GetTableName(typeof(TEntity));
         var propertyName = ExtractPropertyName(selector);

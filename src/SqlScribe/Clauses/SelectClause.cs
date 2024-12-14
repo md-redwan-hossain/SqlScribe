@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 
 namespace SqlScribe.Clauses;
 
-// public record SelectClause<TEntity, TValue>(Expression<Func<TEntity, TValue>> Selector, string? Alias = null);
 public abstract class BaseSelectClause
 {
     public abstract LambdaExpression Selector { get; }

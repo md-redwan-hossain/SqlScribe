@@ -13,7 +13,7 @@ public partial class SqlQueryBuilder
                 switch (location)
                 {
                     case SqlKeywordLocation.WhereClause:
-                        _conditionQueue.Enqueue(" ( ");
+                        _whereQueue.Enqueue(" ( ");
                         break;
                     case SqlKeywordLocation.HavingClause:
                         _havingQueue.Enqueue(" ( ");
@@ -28,7 +28,7 @@ public partial class SqlQueryBuilder
                 switch (location)
                 {
                     case SqlKeywordLocation.WhereClause:
-                        _conditionQueue.Enqueue(" ) ");
+                        _whereQueue.Enqueue(" ) ");
                         break;
                     case SqlKeywordLocation.HavingClause:
                         _havingQueue.Enqueue(" ) ");
@@ -50,7 +50,7 @@ public partial class SqlQueryBuilder
         switch (location)
         {
             case SqlKeywordLocation.WhereClause:
-                _conditionQueue.Enqueue(" AND ");
+                _whereQueue.Enqueue(" AND ");
                 break;
             case SqlKeywordLocation.HavingClause:
                 _havingQueue.Enqueue(" AND ");
@@ -67,7 +67,7 @@ public partial class SqlQueryBuilder
         switch (location)
         {
             case SqlKeywordLocation.WhereClause:
-                _conditionQueue.Enqueue(" OR ");
+                _whereQueue.Enqueue(" OR ");
                 break;
             case SqlKeywordLocation.HavingClause:
                 _havingQueue.Enqueue(" OR ");

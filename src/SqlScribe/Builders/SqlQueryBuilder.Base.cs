@@ -11,7 +11,7 @@ public partial class SqlQueryBuilder
     private bool _runDelete;
     private readonly Dictionary<string, object?> _parameters = new();
     private readonly Queue<string> _orderByQueue = new();
-    private readonly Queue<string> _conditionQueue = new();
+    private readonly Queue<string> _whereQueue = new();
     private readonly Queue<string> _havingQueue = new();
     private readonly Queue<string> _joinQueue = new();
     private readonly Queue<string> _selectQueue = new();
@@ -47,9 +47,9 @@ public partial class SqlQueryBuilder
             clone._orderByQueue.Enqueue(item);
         }
 
-        foreach (var item in _conditionQueue)
+        foreach (var item in _whereQueue)
         {
-            clone._conditionQueue.Enqueue(item);
+            clone._whereQueue.Enqueue(item);
         }
 
         foreach (var item in _joinQueue)
@@ -84,9 +84,9 @@ public partial class SqlQueryBuilder
         {
             sql.Append($"DELETE FROM {tableName} ");
 
-            if (_conditionQueue.Count != 0)
+            if (_whereQueue.Count != 0)
             {
-                sql.Append(" WHERE ").Append(string.Join(" ", _conditionQueue));
+                sql.Append(" WHERE ").Append(string.Join(" ", _whereQueue));
             }
         }
 
@@ -125,9 +125,9 @@ public partial class SqlQueryBuilder
                 }
             }
 
-            if (_conditionQueue.Count != 0)
+            if (_whereQueue.Count != 0)
             {
-                sql.Append(" WHERE ").Append(string.Join(" ", _conditionQueue));
+                sql.Append(" WHERE ").Append(string.Join(" ", _whereQueue));
             }
 
             upperBound = _groupByQueue.Count;
@@ -169,11 +169,17 @@ public partial class SqlQueryBuilder
                 sql.Append(" LIMIT ").Append(limit);
             }
         }
-
-
+        
         if (excludeSemicolon is false)
         {
-            sql.Append(';');
+            if (char.IsWhiteSpace(sql[^1]))
+            {
+                sql[^1] = ';';
+            }
+            else
+            {
+                sql.Append(';');
+            }
         }
 
         return (NormalizeWhiteSpace(sql).ToString().Trim(), _parameters);

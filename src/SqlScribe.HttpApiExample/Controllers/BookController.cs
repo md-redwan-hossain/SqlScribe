@@ -20,10 +20,10 @@ public sealed class BookController : ControllerBase
         return ControllerContext.MakeResponse(StatusCodes.Status200OK, data);
     }
 
-    [HttpGet("aggregated")]
-    public async Task<IActionResult> GetAggregatedBook([FromQuery] decimal price)
+    [HttpGet("by-price-range")]
+    public async Task<IActionResult> GetAggregatedBook([FromQuery] decimal lowerBound, [FromQuery] decimal upperBound)
     {
-        var data = await _bookService.GetAllByMinimumPriceAsync(price, HttpContext.RequestAborted);
+        var data = await _bookService.GetAllByPriceRangeAsync(lowerBound, upperBound, HttpContext.RequestAborted);
         return ControllerContext.MakeResponse(StatusCodes.Status200OK, data);
     }
 

@@ -13,6 +13,8 @@ using SqlScribe.HttpApiExample.Data;
 using SqlScribe.HttpApiExample.Services;
 using SqlScribe.HttpApiExample.Utils;
 
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string connectionString = "DataSource=db.sqlite3;Cache=Shared;";
@@ -21,7 +23,6 @@ var optionsBuilder = new DbContextOptionsBuilder<BookDbContext>();
 optionsBuilder.UseSqlite(connectionString);
 
 builder.Services.TryAddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFactory(connectionString));
-
 await using (var dbContext = new BookDbContext(optionsBuilder.Options))
 {
     dbContext.Database.EnsureDeleted();
