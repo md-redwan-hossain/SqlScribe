@@ -1,6 +1,0 @@
-@SqlScribe.HttpApiExample_HostAddress = http://localhost:5071
-
-GET {{SqlScribe.HttpApiExample_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
