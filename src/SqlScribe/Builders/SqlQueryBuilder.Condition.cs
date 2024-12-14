@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Text;
 using SqlScribe.Clauses;
-using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
@@ -83,7 +82,7 @@ public partial class SqlQueryBuilder
 
         return this;
     }
-    
+
     public SqlQueryBuilder AndWhere<TLeftOperandEntity, TLeftOperandValue, TRightOperandEntity, TRightOperandValue>(
         WhereClause<TLeftOperandEntity, TLeftOperandValue> leftOperand,
         WhereClause<TRightOperandEntity, TRightOperandValue> rightOperand, bool wrapWithParenthesis)
@@ -105,7 +104,6 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    
     public SqlQueryBuilder OrWhere<TLeftOperandEntity, TLeftOperandValue, TRightOperandEntity, TRightOperandValue>(
         WhereClause<TLeftOperandEntity, TLeftOperandValue> leftOperand,
         WhereClause<TRightOperandEntity, TRightOperandValue> rightOperand, bool wrapWithParenthesis)
@@ -127,20 +125,27 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Where<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, SqlOperator sqlOperator,
-        TValue value, bool ignoreIfValueIsNull = true)
+    public SqlQueryBuilder Where<TEntity, TValue>(WhereClause<TEntity, TValue> clause)
     {
-        if (ignoreIfValueIsNull && value is null)
-        {
-            return this;
-        }
-
         var tableName = GetTableName(typeof(TEntity));
-        var propertyName = ExtractPropertyName(selector);
+        var propertyName = ExtractPropertyName(clause.Selector);
         var columnName = ConvertName(propertyName, _namingConvention);
 
-        var paramName = AddParameter(value);
-        _conditionQueue.Enqueue($"{tableName}.{columnName} {GetMappedOperator(sqlOperator)} {paramName}");
+        var paramName = AddParameter(clause.Value);
+        _conditionQueue.Enqueue($"{tableName}.{columnName} {GetMappedOperator(clause.Operator)} {paramName}");
+        return this;
+    }
+
+    public SqlQueryBuilder Having<TEntity, TValue>(HavingClause<TEntity, TValue> clause)
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        var propertyName = ExtractPropertyName(clause.Selector);
+        var columnName = ConvertName(propertyName, _namingConvention);
+        var aggregateFunc = clause.Function.ToString().ToUpperInvariant();
+
+        var paramName = AddParameter(clause.Value);
+        _havingQueue.Enqueue(
+            $" {aggregateFunc}({tableName}.{columnName}) {GetMappedOperator(clause.Operator)} {paramName}");
         return this;
     }
 }

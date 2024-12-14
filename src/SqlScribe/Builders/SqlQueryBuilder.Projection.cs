@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using SqlScribe.Clauses;
 
 namespace SqlScribe.Builders;
 
@@ -21,6 +22,23 @@ public partial class SqlQueryBuilder
             : $"{tableName}.{columnName} as {DelimitString(alias)}";
 
         _selectQueue.Enqueue(final);
+        return this;
+    }
+
+    public SqlQueryBuilder Select<TEntity>(params BaseSelectClause[] clauses)
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        foreach (var item in clauses)
+        {
+            var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
+        
+            var final = string.IsNullOrEmpty(item.Alias)
+                ? $"{tableName}.{columnName}"
+                : $"{tableName}.{columnName} as {DelimitString(item.Alias)}";
+        
+            _selectQueue.Enqueue(final);
+        }
+
         return this;
     }
 

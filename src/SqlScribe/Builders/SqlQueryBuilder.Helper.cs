@@ -13,7 +13,7 @@ public partial class SqlQueryBuilder
         _parameters[paramName] = value;
         return paramName;
     }
-    
+
     private static string GetMappedOperator(SqlOperator sqlOperator)
     {
         return sqlOperator switch
@@ -41,6 +41,16 @@ public partial class SqlQueryBuilder
     }
 
     private static string ExtractPropertyName<TEntity, TValue>(Expression<Func<TEntity, TValue>> expression)
+    {
+        return expression.Body switch
+        {
+            MemberExpression member => member.Member.Name,
+            UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
+            _ => throw new InvalidOperationException("Invalid expression format.")
+        };
+    }
+
+    private static string ExtractPropertyName(LambdaExpression expression)
     {
         return expression.Body switch
         {
@@ -102,5 +112,4 @@ public partial class SqlQueryBuilder
             _ => throw new NotSupportedException($"Naming convention {convention} is not supported.")
         };
     }
-    
 }

@@ -10,8 +10,8 @@ public partial class SqlQueryBuilder
         var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
 
         var final = string.IsNullOrEmpty(alias)
-            ? $"COUNT({tableName}.{columnName})"
-            : $"COUNT({tableName}.{columnName}) as {DelimitString(alias)}";
+            ? $" COUNT({tableName}.{columnName}) "
+            : $" COUNT({tableName}.{columnName}) as {DelimitString(alias)} ";
 
         _aggregateQueue.Enqueue(final);
         return this;

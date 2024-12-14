@@ -1,11 +1,12 @@
 namespace SqlScribe.Enums;
 
-public enum SqlOperator
+public enum SqlOperator : byte
 {
-    Equal,
+    Equal = 1,
     GreaterThan,
     LessThan,
     GreaterThanOrEqual,
     LessThanOrEqual,
-    NotEqual
+    NotEqual,
+    Like
 }

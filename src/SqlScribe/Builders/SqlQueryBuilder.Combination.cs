@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using SqlScribe.Clauses;
 using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
@@ -10,6 +11,18 @@ public partial class SqlQueryBuilder
         var tableName = GetTableName(typeof(TEntity));
         var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
         _groupByQueue.Enqueue($" {tableName}.{columnName} ");
+        return this;
+    }
+
+    public SqlQueryBuilder GroupBy<TEntity>(params BaseGroupByClause[] clauses)
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        foreach (var item in clauses)
+        {
+            var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
+            _groupByQueue.Enqueue($" {tableName}.{columnName} ");
+        }
+
         return this;
     }
 

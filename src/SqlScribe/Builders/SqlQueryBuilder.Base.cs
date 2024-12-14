@@ -12,6 +12,7 @@ public partial class SqlQueryBuilder
     private readonly Dictionary<string, object?> _parameters = new();
     private readonly Queue<string> _orderByQueue = new();
     private readonly Queue<string> _conditionQueue = new();
+    private readonly Queue<string> _havingQueue = new();
     private readonly Queue<string> _joinQueue = new();
     private readonly Queue<string> _selectQueue = new();
     private readonly Queue<string> _groupByQueue = new();
@@ -138,6 +139,15 @@ public partial class SqlQueryBuilder
                 {
                     counter += 1;
                     sql.Append(counter < upperBound ? $"{item}, " : item);
+                }
+            }
+
+            if (_groupByQueue.Count > 0 && _havingQueue.Count > 0)
+            {
+                sql.Append(" HAVING ");
+                foreach (var item in _havingQueue)
+                {
+                    sql.Append($" {item} ");
                 }
             }
 
