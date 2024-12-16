@@ -16,9 +16,9 @@ public class SqlQueryBuilderFactory
         _pluralizeTableName = pluralizeTableName;
         _databaseVendor = databaseVendor;
     }
-    
-    public SqlQueryBuilder CreateSqlQueryBuilder()
+
+    public SqlQueryBuilder<TEntity> CreateSqlQueryBuilder<TEntity>()
     {
-        return new SqlQueryBuilder(_databaseVendor, _namingConvention, _pluralizeTableName);
+        return new SqlQueryBuilder<TEntity>(_databaseVendor, _namingConvention, _pluralizeTableName);
     }
 }

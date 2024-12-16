@@ -5,7 +5,7 @@ using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
     private string AddParameter<TValue>(TValue value)
     {
@@ -41,12 +41,37 @@ public partial class SqlQueryBuilder
         return ConvertName(tableName, _namingConvention);
     }
 
-    private static string ExtractPropertyName<TEntity, TValue>(Expression<Func<TEntity, TValue>> expression)
+    // private static string ExtractPropertyName<TValue>(Expression<Func<TEntity, TValue>> expression)
+    // {
+    //     return expression.Body switch
+    //     {
+    //         MemberExpression member => member.Member.Name,
+    //         UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
+    //         _ => throw new InvalidOperationException("Invalid expression format.")
+    //     };
+    // }
+
+    // private static IEnumerable<string> ExtractPropertyNames<TValue>(Expression<Func<TEntity, TValue>> expression)
+    // {
+    //     return expression.Body switch
+    //     {
+    //         MemberExpression member => [member.Member.Name],
+    //         UnaryExpression { Operand: MemberExpression unaryMember } => [unaryMember.Member.Name],
+    //         NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
+    //                                        throw new Exception("No member found"),
+    //         _ => throw new InvalidOperationException("Invalid expression format.")
+    //     };
+    // }
+
+
+    private static IEnumerable<string> ExtractPropertyNames(LambdaExpression expression)
     {
         return expression.Body switch
         {
-            MemberExpression member => member.Member.Name,
-            UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
+            MemberExpression member => [member.Member.Name],
+            UnaryExpression { Operand: MemberExpression unaryMember } => [unaryMember.Member.Name],
+            NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
+                                           throw new Exception("No member found"),
             _ => throw new InvalidOperationException("Invalid expression format.")
         };
     }
@@ -57,6 +82,7 @@ public partial class SqlQueryBuilder
         {
             MemberExpression member => member.Member.Name,
             UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
+            NewExpression newExpression => throw new Exception("Anonymous expression not allowed"),
             _ => throw new InvalidOperationException("Invalid expression format.")
         };
     }

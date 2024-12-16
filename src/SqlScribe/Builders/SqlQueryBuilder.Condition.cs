@@ -1,12 +1,13 @@
 using System.Linq.Expressions;
 using System.Text;
 using SqlScribe.Clauses;
+using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder WhereNotIn<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector,
+    public SqlQueryBuilder<TEntity> WhereNotIn<TValue>(Expression<Func<TEntity, TValue>> selector,
         params TValue[] values)
     {
         var tableName = GetTableName(typeof(TEntity));
@@ -30,7 +31,8 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder WhereIn<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, params TValue[] values)
+    public SqlQueryBuilder<TEntity> WhereIn<TValue>(Expression<Func<TEntity, TValue>> selector,
+        params TValue[] values)
     {
         var tableName = GetTableName(typeof(TEntity));
         var propertyName = ExtractPropertyName(selector);
@@ -53,8 +55,8 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder WhereBetween<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, TValue leftValue,
-        TValue rightValue)
+    public SqlQueryBuilder<TEntity> WhereBetween<TValue>(Expression<Func<TEntity, TValue>> selector,
+        TValue leftValue, TValue rightValue)
     {
         var tableName = GetTableName(typeof(TEntity));
         var propertyName = ExtractPropertyName(selector);
@@ -68,7 +70,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder WhereNotBetween<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector,
+    public SqlQueryBuilder<TEntity> WhereNotBetween<TValue>(Expression<Func<TEntity, TValue>> selector,
         TValue leftValue, TValue rightValue)
     {
         var tableName = GetTableName(typeof(TEntity));
@@ -83,53 +85,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder AndWhere<TLeftOperandEntity, TLeftOperandValue, TRightOperandEntity, TRightOperandValue>(
-        WhereClause<TLeftOperandEntity, TLeftOperandValue> leftOperand,
-        WhereClause<TRightOperandEntity, TRightOperandValue> rightOperand, bool wrapWithParenthesis)
-        where TLeftOperandValue : notnull
-        where TRightOperandValue : notnull
-    {
-        var left = new StringBuilder();
-
-        left.Append($"{GetTableName(typeof(TLeftOperandEntity))}.{ExtractPropertyName(leftOperand.Selector)}")
-            .Append($" {GetMappedOperator(leftOperand.Operator)} ")
-            .Append($"{AddParameter(leftOperand.Value)}");
-
-        var right = new StringBuilder();
-
-        right.Append($"{GetTableName(typeof(TRightOperandEntity))}.{ExtractPropertyName(rightOperand.Selector)}")
-            .Append($" {GetMappedOperator(rightOperand.Operator)} ")
-            .Append($"{AddParameter(rightOperand.Value)}");
-
-        _whereQueue.Enqueue(wrapWithParenthesis ? $"({left} AND {right})" : $"{left} AND {right}");
-
-        return this;
-    }
-
-    public SqlQueryBuilder OrWhere<TLeftOperandEntity, TLeftOperandValue, TRightOperandEntity, TRightOperandValue>(
-        WhereClause<TLeftOperandEntity, TLeftOperandValue> leftOperand,
-        WhereClause<TRightOperandEntity, TRightOperandValue> rightOperand, bool wrapWithParenthesis)
-        where TLeftOperandValue : notnull
-        where TRightOperandValue : notnull
-    {
-        var left = new StringBuilder();
-
-        left.Append($"{GetTableName(typeof(TLeftOperandEntity))}.{ExtractPropertyName(leftOperand.Selector)}")
-            .Append($" {GetMappedOperator(leftOperand.Operator)} ")
-            .Append($"{AddParameter(leftOperand.Value)}");
-
-        var right = new StringBuilder();
-
-        right.Append($"{GetTableName(typeof(TRightOperandEntity))}.{ExtractPropertyName(rightOperand.Selector)}")
-            .Append($" {GetMappedOperator(rightOperand.Operator)} ")
-            .Append($"{AddParameter(rightOperand.Value)}");
-
-        _whereQueue.Enqueue(wrapWithParenthesis ? $"({left} OR {right})" : $"{left} OR {right}");
-
-        return this;
-    }
-
-    public SqlQueryBuilder OrWhere<TEntity>(params BaseWhereClause[] clauses)
+    public SqlQueryBuilder<TEntity> OrWhere(params BaseWhereClause[] clauses)
     {
         var tableName = GetTableName(typeof(TEntity));
         var upperBound = clauses.Length;
@@ -147,11 +103,11 @@ public partial class SqlQueryBuilder
                 _whereQueue.Enqueue(" OR ");
             }
         }
-        
+
         return this;
     }
 
-    public SqlQueryBuilder AndWhere<TEntity>(params BaseWhereClause[] clauses)
+    public SqlQueryBuilder<TEntity> AndWhere(params BaseWhereClause[] clauses)
     {
         var tableName = GetTableName(typeof(TEntity));
         var upperBound = clauses.Length;
@@ -173,7 +129,19 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Where<TEntity, TValue>(WhereClause<TEntity, TValue> clause)
+    public SqlQueryBuilder<TEntity> Where<TValue>(Expression<Func<TEntity, TValue>> selector, SqlOperator sqlOperator,
+        TValue value) where TValue : notnull
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        var propertyName = ExtractPropertyName(selector);
+        var columnName = ConvertName(propertyName, _namingConvention);
+
+        var paramName = AddParameter(value);
+        _whereQueue.Enqueue($"{tableName}.{columnName} {GetMappedOperator(sqlOperator)} {paramName}");
+        return this;
+    }
+
+    public SqlQueryBuilder<TEntity> Where<TValue>(WhereClause<TEntity, TValue> clause)
         where TValue : notnull
     {
         var tableName = GetTableName(typeof(TEntity));
@@ -185,7 +153,22 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Having<TEntity, TValue>(HavingClause<TEntity, TValue> clause)
+    public SqlQueryBuilder<TEntity> Having<TValue>(AggregateFunction function,
+        Expression<Func<TEntity, TValue>> selector, SqlOperator sqlOperator, TValue value)
+        where TValue : notnull
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        var propertyName = ExtractPropertyName(selector);
+        var columnName = ConvertName(propertyName, _namingConvention);
+        var aggregateFunc = function.ToString().ToUpperInvariant();
+
+        var paramName = AddParameter(value);
+        _havingQueue.Enqueue(
+            $" {aggregateFunc}({tableName}.{columnName}) {GetMappedOperator(sqlOperator)} {paramName} ");
+        return this;
+    }
+
+    public SqlQueryBuilder<TEntity> Having<TValue>(HavingClause<TEntity, TValue> clause)
         where TValue : notnull
     {
         var tableName = GetTableName(typeof(TEntity));
@@ -200,7 +183,7 @@ public partial class SqlQueryBuilder
     }
 
 
-    public SqlQueryBuilder OrHaving<TEntity>(params BaseHavingClause[] clauses)
+    public SqlQueryBuilder<TEntity> OrHaving(params BaseHavingClause[] clauses)
     {
         var tableName = GetTableName(typeof(TEntity));
         var upperBound = clauses.Length;
@@ -220,11 +203,11 @@ public partial class SqlQueryBuilder
                 _havingQueue.Enqueue(" OR ");
             }
         }
-        
+
         return this;
     }
 
-    public SqlQueryBuilder AndHaving<TEntity>(params BaseHavingClause[] clauses)
+    public SqlQueryBuilder<TEntity> AndHaving(params BaseHavingClause[] clauses)
     {
         var tableName = GetTableName(typeof(TEntity));
         var upperBound = clauses.Length;
@@ -244,7 +227,7 @@ public partial class SqlQueryBuilder
                 _havingQueue.Enqueue(" AND ");
             }
         }
-        
+
         return this;
     }
 }

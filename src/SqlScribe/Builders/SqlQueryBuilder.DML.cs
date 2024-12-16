@@ -1,8 +1,8 @@
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder Delete()
+    public SqlQueryBuilder<TEntity> Delete()
     {
         _hasDeleteStatement = true;
         return this;

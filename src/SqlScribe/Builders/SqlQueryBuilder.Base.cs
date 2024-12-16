@@ -3,7 +3,7 @@ using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
     private readonly DatabaseVendor _databaseVendor;
     private readonly SqlNamingConvention _namingConvention;
@@ -29,9 +29,9 @@ public partial class SqlQueryBuilder
         _databaseVendor = databaseVendor;
     }
 
-    public SqlQueryBuilder Clone()
+    public SqlQueryBuilder<TEntity> Clone()
     {
-        var clone = new SqlQueryBuilder(_databaseVendor, _namingConvention, _pluralizeTableName)
+        var clone = new SqlQueryBuilder<TEntity>(_databaseVendor, _namingConvention, _pluralizeTableName)
         {
             _hasSelectAllStatement = _hasSelectAllStatement,
             _paramCounter = _paramCounter,
@@ -76,7 +76,7 @@ public partial class SqlQueryBuilder
         return clone;
     }
 
-    public (string Sql, Dictionary<string, object?> Parameters) Build<TEntity>(bool excludeSemicolon = false)
+    public (string Sql, Dictionary<string, object?> Parameters) Build(bool excludeSemicolon = false)
     {
         var sql = new StringBuilder();
         var tableName = GetTableName(typeof(TEntity));
@@ -97,7 +97,7 @@ public partial class SqlQueryBuilder
             {
                 throw new Exception("No select statement is added");
             }
-            
+
             sql.Append("SELECT ");
 
             if (_hasSelectAllStatement is not false)
@@ -113,7 +113,7 @@ public partial class SqlQueryBuilder
                 counter += 1;
                 sql.Append(counter < upperBound ? $"{item}, " : item);
             }
-            
+
             sql.Append($" FROM {tableName} ");
 
             foreach (var item in _aggregateQueue)

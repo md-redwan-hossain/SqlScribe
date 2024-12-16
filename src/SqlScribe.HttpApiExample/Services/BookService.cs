@@ -76,11 +76,11 @@ public class BookService : IBookService
     public async Task<IList<Book>> GetAllAsync()
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder();
+        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>();
 
         var query = qb
             .SelectAll()
-            .Build<Book>();
+            .Build();
 
         return (await conn.QueryAsync<Book>(query.Sql, query.Parameters)).ToList();
     }
@@ -89,27 +89,18 @@ public class BookService : IBookService
         CancellationToken ct)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync(ct);
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder();
+        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>();
 
         var query = qb
-            .Select<Book>(
-                new SelectClause<Book, string>(x => x.Title),
-                new SelectClause<Book, decimal>(x => x.Price)
-            )
-            .GroupBy<Book>(
-                new GroupByClause<Book, string>(x => x.Title),
-                new GroupByClause<Book, decimal>(x => x.Price)
-            )
-            .AndHaving<Book>(
-                new HavingClause<Book, decimal>(AggregateFunction.Min, x => x.Price,
-                    SqlOperator.GreaterThanOrEqual, lowerBound),
-                new HavingClause<Book, decimal>(AggregateFunction.Max, x => x.Price,
-                    SqlOperator.LessThanOrEqual, upperBound)
-            )
-            .OrderByAsc<Book, decimal>(x => x.Price)
-            .Build<Book>();
+            .Select(x => new { x.Title, x.Price })
+            .GroupBy(x => new { x.Title, x.Price })
+            .Having(AggregateFunction.Min, x => x.Price, SqlOperator.GreaterThanOrEqual, lowerBound)
+            .And(SqlKeywordLocation.HavingClause)
+            .Having(AggregateFunction.Max, x => x.Price, SqlOperator.LessThanOrEqual, upperBound)
+            .OrderByAsc(x => x.Price)
+            .Build();
 
-        query.Dump();
+        // query.Dump();
 
         return (await conn.QueryAsync<BookSlimResponse>(new CommandDefinition(query.Sql, query.Parameters,
             cancellationToken: ct))).ToList();
@@ -118,12 +109,11 @@ public class BookService : IBookService
     public async Task<ValueOutcome<Book, IBadOutcome>> GetOneAsync(int id)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder();
-
-        var query = qb
+        
+        var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .SelectAll()
-            .Where(new WhereClause<Book, int>(x => x.Id, SqlOperator.Equal, id))
-            .Build<Book>();
+            .Where(x => x.Id, SqlOperator.Equal, id)
+            .Build();
 
         var entity = await conn.QueryFirstOrDefaultAsync<Book>(query.Sql, query.Parameters);
 
@@ -138,12 +128,11 @@ public class BookService : IBookService
     public async Task<ValueOutcome<IGoodOutcome, IBadOutcome>> RemoveAsync(int id)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder();
-
-        var query = qb
+ 
+        var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .Delete()
-            .Where(new WhereClause<Book, int>(x => x.Id, SqlOperator.Equal, id))
-            .Build<Book>();
+            .Where(x => x.Id, SqlOperator.Equal, id)
+            .Build();
 
         var rowsAffected = await conn.ExecuteAsync(query.Sql, query.Parameters);
 

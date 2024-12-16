@@ -4,30 +4,43 @@ using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder GroupBy<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector)
+    public SqlQueryBuilder<TEntity> GroupBy<TValue>(Expression<Func<TEntity, TValue>> selector)
     {
         var tableName = GetTableName(typeof(TEntity));
-        var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
-        _groupByQueue.Enqueue($" {tableName}.{columnName} ");
-        return this;
-    }
 
-    public SqlQueryBuilder GroupBy<TEntity>(params BaseGroupByClause[] clauses)
-    {
-        var tableName = GetTableName(typeof(TEntity));
-        foreach (var item in clauses)
+        var propertyNames = ExtractPropertyNames(selector);
+
+        foreach (var item in propertyNames)
         {
-            var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
-            _groupByQueue.Enqueue($"{tableName}.{columnName}");
+            var columnName = ConvertName(item, _namingConvention);
+            _groupByQueue.Enqueue($" {tableName}.{columnName} ");
         }
 
         return this;
     }
 
-    public SqlQueryBuilder Join<TPrimary, TJoined, TPrimaryValue, TJoinedValue>(SqlJoinType sqlJoinType,
-        Expression<Func<TPrimary, TPrimaryValue>> fromKey, Expression<Func<TJoined, TJoinedValue>> toKey)
+    public SqlQueryBuilder<TEntity> GroupBy(params BaseGroupByClause[] clauses)
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        foreach (var item in clauses)
+        {
+            var propertyNames = ExtractPropertyNames(item.Selector);
+
+            foreach (var innerItem in propertyNames)
+            {
+                var columnName = ConvertName(innerItem, _namingConvention);
+                _groupByQueue.Enqueue($"{tableName}.{columnName}");
+            }
+        }
+
+        return this;
+    }
+
+    public SqlQueryBuilder<TEntity> Join<TJoinedEntity, TEntityValue, TJoinedEntityValue>(SqlJoinType sqlJoinType,
+        Expression<Func<TEntity, TEntityValue>> entityKey,
+        Expression<Func<TJoinedEntity, TJoinedEntityValue>> joinedEntityKey)
     {
         var joinTypeString = sqlJoinType switch
         {
@@ -38,12 +51,12 @@ public partial class SqlQueryBuilder
             _ => throw new ArgumentException("Invalid join type")
         };
 
-        var fromTable = GetTableName(typeof(TPrimary));
-        var toTable = GetTableName(typeof(TJoined));
+        var fromTable = GetTableName(typeof(TEntity));
+        var toTable = GetTableName(typeof(TJoinedEntity));
 
         var fromColumn =
-            ConvertName(ExtractPropertyName(fromKey), _namingConvention);
-        var toColumn = ConvertName(ExtractPropertyName(toKey), _namingConvention);
+            ConvertName(ExtractPropertyName(entityKey), _namingConvention);
+        var toColumn = ConvertName(ExtractPropertyName(joinedEntityKey), _namingConvention);
 
         _joinQueue.Enqueue($" {joinTypeString} {toTable} ON {fromTable}.{fromColumn} = {toTable}.{toColumn} ");
 

@@ -2,9 +2,9 @@ using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder AddParenthesis(SqlParenthesisType parenthesisType, SqlKeywordLocation location)
+    public SqlQueryBuilder<TEntity> AddParenthesis(SqlParenthesisType parenthesisType, SqlKeywordLocation location)
     {
         switch (parenthesisType)
         {
@@ -45,7 +45,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder And(SqlKeywordLocation location)
+    public SqlQueryBuilder<TEntity> And(SqlKeywordLocation location)
     {
         switch (location)
         {
@@ -62,7 +62,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Or(SqlKeywordLocation location)
+    public SqlQueryBuilder<TEntity> Or(SqlKeywordLocation location)
     {
         switch (location)
         {

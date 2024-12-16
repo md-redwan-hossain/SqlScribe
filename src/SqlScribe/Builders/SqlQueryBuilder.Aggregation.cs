@@ -2,9 +2,9 @@ using System.Linq.Expressions;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder Count<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null)
+    public SqlQueryBuilder<TEntity> Count<TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null)
     {
         var tableName = GetTableName(typeof(TEntity));
         var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
@@ -17,7 +17,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Max<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null)
+    public SqlQueryBuilder<TEntity> Max<TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null)
     {
         var tableName = GetTableName(typeof(TEntity));
         var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
@@ -30,7 +30,7 @@ public partial class SqlQueryBuilder
         return this;
     }
 
-    public SqlQueryBuilder Sum<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null,
+    public SqlQueryBuilder<TEntity> Sum<TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null,
         bool useCoalesce = false, TValue? coalesceValue = default)
     {
         var tableName = GetTableName(typeof(TEntity));

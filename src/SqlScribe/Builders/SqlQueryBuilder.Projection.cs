@@ -3,53 +3,54 @@ using SqlScribe.Clauses;
 
 namespace SqlScribe.Builders;
 
-public partial class SqlQueryBuilder
+public partial class SqlQueryBuilder<TEntity>
 {
-    public SqlQueryBuilder SelectAll()
+    public SqlQueryBuilder<TEntity> SelectAll()
     {
         _hasSelectAllStatement = true;
         return this;
     }
 
-    public SqlQueryBuilder Select<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, string? alias = null)
+    public SqlQueryBuilder<TEntity> Select<TValue>(Expression<Func<TEntity, TValue>> selector)
     {
         var tableName = GetTableName(typeof(TEntity));
-        var columnName = ConvertName(ExtractPropertyName(selector), _namingConvention);
+        var propertyNames = ExtractPropertyNames(selector);
 
-        var final = string.IsNullOrEmpty(alias)
-            ? $"{tableName}.{columnName}"
-            : $"{tableName}.{columnName} as {DelimitString(alias)}";
-
-        _selectQueue.Enqueue(final);
-        return this;
-    }
-
-    public SqlQueryBuilder Select<TEntity>(params BaseSelectClause[] clauses)
-    {
-        var tableName = GetTableName(typeof(TEntity));
-        foreach (var item in clauses)
+        foreach (var item in propertyNames)
         {
-            var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
-
-            var final = string.IsNullOrEmpty(item.Alias)
-                ? $"{tableName}.{columnName}"
-                : $"{tableName}.{columnName} as {DelimitString(item.Alias)}";
-
-            _selectQueue.Enqueue(final);
+            var columnName = ConvertName(item, _namingConvention);
+            _selectQueue.Enqueue($"{tableName}.{columnName}");
         }
 
         return this;
     }
 
-    public SqlQueryBuilder MapSelect<TSourceEntity, TResultEntity, TValue>(
+    public SqlQueryBuilder<TEntity> Select(params BaseSelectClause[] clauses)
+    {
+        var tableName = GetTableName(typeof(TEntity));
+        foreach (var item in clauses)
+        {
+            var propertyNames = ExtractPropertyNames(item.Selector);
+
+            foreach (var innerItem in propertyNames)
+            {
+                var columnName = ConvertName(innerItem, _namingConvention);
+                _selectQueue.Enqueue($"{tableName}.{columnName}");
+            }
+        }
+
+        return this;
+    }
+
+    public SqlQueryBuilder<TEntity> Select<TSourceEntity, TDestinationEntity, TValue>(
         Expression<Func<TSourceEntity, TValue>> sourceSelector,
-        Expression<Func<TResultEntity, TValue>> dtoSelector)
+        Expression<Func<TDestinationEntity, TValue>> destinationSelector)
     {
         var sourceTableName = GetTableName(typeof(TSourceEntity));
         var sourceColumnName = ConvertName(ExtractPropertyName(sourceSelector), _namingConvention);
-        var dtoColumnName = ConvertName(ExtractPropertyName(dtoSelector), _namingConvention);
+        var destinationColumnName = ConvertName(ExtractPropertyName(destinationSelector), _namingConvention);
 
-        _selectQueue.Enqueue($"{sourceTableName}.{sourceColumnName} AS {dtoColumnName}");
+        _selectQueue.Enqueue($"{sourceTableName}.{sourceColumnName} AS {destinationColumnName}");
         return this;
     }
 }
