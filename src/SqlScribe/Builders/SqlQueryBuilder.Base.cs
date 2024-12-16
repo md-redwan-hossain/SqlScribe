@@ -8,7 +8,8 @@ public partial class SqlQueryBuilder
     private readonly DatabaseVendor _databaseVendor;
     private readonly SqlNamingConvention _namingConvention;
     private readonly bool _pluralizeTableName;
-    private bool _runDelete;
+    private bool _hasDeleteStatement;
+    private bool _hasSelectAllStatement;
     private readonly Dictionary<string, object?> _parameters = new();
     private readonly Queue<string> _orderByQueue = new();
     private readonly Queue<string> _whereQueue = new();
@@ -32,7 +33,7 @@ public partial class SqlQueryBuilder
     {
         var clone = new SqlQueryBuilder(_databaseVendor, _namingConvention, _pluralizeTableName)
         {
-            _runDelete = _runDelete,
+            _hasSelectAllStatement = _hasSelectAllStatement,
             _paramCounter = _paramCounter,
             _page = _page,
             _limit = _limit
@@ -80,7 +81,7 @@ public partial class SqlQueryBuilder
         var sql = new StringBuilder();
         var tableName = GetTableName(typeof(TEntity));
 
-        if (_runDelete is not false)
+        if (_hasDeleteStatement is not false)
         {
             sql.Append($"DELETE FROM {tableName} ");
 
@@ -90,13 +91,18 @@ public partial class SqlQueryBuilder
             }
         }
 
-        if (_runDelete is false)
+        if (_hasDeleteStatement is false)
         {
-            sql.Append("SELECT ");
-
-            if (_selectQueue.Count == 0)
+            if (_hasSelectAllStatement is false && _selectQueue.Count == 0)
             {
                 throw new Exception("No select statement is added");
+            }
+            
+            sql.Append("SELECT ");
+
+            if (_hasSelectAllStatement is not false)
+            {
+                sql.Append(" * ");
             }
 
             var upperBound = _selectQueue.Count + _aggregateQueue.Count;
@@ -107,8 +113,7 @@ public partial class SqlQueryBuilder
                 counter += 1;
                 sql.Append(counter < upperBound ? $"{item}, " : item);
             }
-
-
+            
             sql.Append($" FROM {tableName} ");
 
             foreach (var item in _aggregateQueue)
@@ -169,7 +174,7 @@ public partial class SqlQueryBuilder
                 sql.Append(" LIMIT ").Append(limit);
             }
         }
-        
+
         if (excludeSemicolon is false)
         {
             if (char.IsWhiteSpace(sql[^1]))

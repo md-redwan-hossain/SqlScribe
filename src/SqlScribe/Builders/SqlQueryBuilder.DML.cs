@@ -4,8 +4,7 @@ public partial class SqlQueryBuilder
 {
     public SqlQueryBuilder Delete()
     {
-        _selectQueue.Clear();
-        _runDelete = true;
+        _hasDeleteStatement = true;
         return this;
     }
 }

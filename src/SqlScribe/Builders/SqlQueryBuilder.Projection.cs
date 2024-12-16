@@ -7,8 +7,7 @@ public partial class SqlQueryBuilder
 {
     public SqlQueryBuilder SelectAll()
     {
-        _selectQueue.Clear();
-        _selectQueue.Enqueue(" * ");
+        _hasSelectAllStatement = true;
         return this;
     }
 
@@ -31,11 +30,11 @@ public partial class SqlQueryBuilder
         foreach (var item in clauses)
         {
             var columnName = ConvertName(ExtractPropertyName(item.Selector), _namingConvention);
-        
+
             var final = string.IsNullOrEmpty(item.Alias)
                 ? $"{tableName}.{columnName}"
                 : $"{tableName}.{columnName} as {DelimitString(item.Alias)}";
-        
+
             _selectQueue.Enqueue(final);
         }
 
