@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Humanizer;
@@ -68,8 +71,8 @@ public partial class SqlQueryBuilder<TEntity>
     {
         return expression.Body switch
         {
-            MemberExpression member => [member.Member.Name],
-            UnaryExpression { Operand: MemberExpression unaryMember } => [unaryMember.Member.Name],
+            MemberExpression member => new[] { member.Member.Name },
+            UnaryExpression { Operand: MemberExpression unaryMember } => new[] { unaryMember.Member.Name },
             NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
                                            throw new Exception("No member found"),
             _ => throw new InvalidOperationException("Invalid expression format.")
@@ -82,7 +85,7 @@ public partial class SqlQueryBuilder<TEntity>
         {
             MemberExpression member => member.Member.Name,
             UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
-            NewExpression newExpression => throw new Exception("Anonymous expression not allowed"),
+            NewExpression => throw new Exception("Anonymous expression not allowed"),
             _ => throw new InvalidOperationException("Invalid expression format.")
         };
     }

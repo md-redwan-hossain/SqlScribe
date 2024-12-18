@@ -9,9 +9,9 @@ public interface IBookService
 {
     Task<ValueOutcome<Book, IBadOutcome>> CreateAsync(BookRequest dto);
     Task<ValueOutcome<Book, IBadOutcome>> UpdateAsync(int id, BookRequest dto);
-    Task<IList<Book>> GetAllAsync();
+    Task<IEnumerable<Book>> GetAllAsync();
 
-    Task<IList<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
+    Task<IEnumerable<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
         CancellationToken ct);
     Task<ValueOutcome<Book, IBadOutcome>> GetOneAsync(int id);
     Task<ValueOutcome<IGoodOutcome, IBadOutcome>> RemoveAsync(int id);

@@ -1,12 +1,10 @@
 using Dapper;
-using Dumpify;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using SharpOutcome;
 using SharpOutcome.Helpers;
 using SharpOutcome.Helpers.Contracts;
 using SharpOutcome.Helpers.Enums;
-using SqlScribe.Clauses;
 using SqlScribe.Enums;
 using SqlScribe.Factories;
 using SqlScribe.HttpApiExample.Data;
@@ -73,7 +71,7 @@ public class BookService : IBookService
         }
     }
 
-    public async Task<IList<Book>> GetAllAsync()
+    public async Task<IEnumerable<Book>> GetAllAsync()
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
         var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>();
@@ -82,16 +80,15 @@ public class BookService : IBookService
             .SelectAll()
             .Build();
 
-        return (await conn.QueryAsync<Book>(query.Sql, query.Parameters)).ToList();
+        return await conn.QueryAsync<Book>(query.Sql, query.Parameters);
     }
 
-    public async Task<IList<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
+    public async Task<IEnumerable<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
         CancellationToken ct)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync(ct);
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>();
 
-        var query = qb
+        var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .Select(x => new { x.Title, x.Price })
             .GroupBy(x => new { x.Title, x.Price })
             .Having(AggregateFunction.Min, x => x.Price, SqlOperator.GreaterThanOrEqual, lowerBound)
@@ -100,16 +97,14 @@ public class BookService : IBookService
             .OrderByAsc(x => x.Price)
             .Build();
 
-        // query.Dump();
-
-        return (await conn.QueryAsync<BookSlimResponse>(new CommandDefinition(query.Sql, query.Parameters,
-            cancellationToken: ct))).ToList();
+        return await conn.QueryAsync<BookSlimResponse>(new CommandDefinition(query.Sql, query.Parameters,
+            cancellationToken: ct));
     }
 
     public async Task<ValueOutcome<Book, IBadOutcome>> GetOneAsync(int id)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
-        
+
         var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .SelectAll()
             .Where(x => x.Id, SqlOperator.Equal, id)
@@ -128,7 +123,7 @@ public class BookService : IBookService
     public async Task<ValueOutcome<IGoodOutcome, IBadOutcome>> RemoveAsync(int id)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
- 
+
         var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .Delete()
             .Where(x => x.Id, SqlOperator.Equal, id)

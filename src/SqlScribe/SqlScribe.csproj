@@ -1,9 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <Title>StringMate</Title>
+        <Authors>Md. Redwan Hossain</Authors>
+        <Copyright>Copyright (c) Md. Redwan Hossain</Copyright>
+        <Description>StringMate offers a collection of useful classes designed for working with the C# string type.</Description>
+        <PackageProjectUrl>https://github.com/md-redwan-hossain/StringMate</PackageProjectUrl>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/md-redwan-hossain/StringMate</RepositoryUrl>
+        <Version>0.0.2-alpha</Version>
+<!--        <PackageIcon>logo.png</PackageIcon>-->
+        <PackageTags>validation validation-library validator string-validation string-utility utility</PackageTags>
+<!--        <PackageReadmeFile>README.md</PackageReadmeFile>-->
+        <NoWarn>CS1591</NoWarn>
+        <DocumentationFile Condition="'$(Configuration)'=='Release'">bin\$(Configuration)\$(TargetFramework)\StringMate.xml</DocumentationFile>
+        <PackageReleaseNotes></PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,3 +1,4 @@
+using System;
 using SqlScribe.Enums;
 
 namespace SqlScribe.Builders;
