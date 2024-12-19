@@ -18,8 +18,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\SqlScribe.ExampleScaffolder\SqlScribe.ExampleScaffolder.csproj" />
-      <ProjectReference Include="..\SqlScribe\SqlScribe.csproj" />
+      <ProjectReference Include="..\SqlScribe.ExampleScaffolder\SqlScribe.ExampleScaffolder.csproj" />
+      <ProjectReference Include="..\src\SqlScribe\SqlScribe.csproj" />
     </ItemGroup>
 
 </Project>

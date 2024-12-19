@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe", "src\SqlScribe\SqlScribe.csproj", "{62A9E37B-1D54-4A80-8464-16ACB0076562}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.HttpApiExample", "src\SqlScribe.HttpApiExample\SqlScribe.HttpApiExample.csproj", "{BDE01713-791B-42F7-B24A-21E93939F77A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.HttpApiExample", "SqlScribe.HttpApiExample\SqlScribe.HttpApiExample.csproj", "{BDE01713-791B-42F7-B24A-21E93939F77A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.Benchmark", "SqlScribe.Benchmark\SqlScribe.Benchmark.csproj", "{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}"
 EndProject

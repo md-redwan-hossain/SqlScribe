@@ -10,7 +10,7 @@
         <PackageProjectUrl>https://github.com/md-redwan-hossain/SqlScribe</PackageProjectUrl>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/md-redwan-hossain/SqlScribe</RepositoryUrl>
-        <Version>0.0.2-alpha</Version>
+        <Version>0.0.3-alpha</Version>
         <!--        <PackageIcon>logo.png</PackageIcon>-->
         <PackageTags>query-builder sql-query-builder sql orm mini-orm</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
