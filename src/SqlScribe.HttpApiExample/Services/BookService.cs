@@ -6,10 +6,10 @@ using SharpOutcome.Helpers;
 using SharpOutcome.Helpers.Contracts;
 using SharpOutcome.Helpers.Enums;
 using SqlScribe.Enums;
+using SqlScribe.ExampleScaffolder.DataTransferObjects;
 using SqlScribe.ExampleScaffolder.Domain;
 using SqlScribe.ExampleScaffolder.Persistence;
 using SqlScribe.Factories;
-using SqlScribe.HttpApiExample.DataTransferObjects;
 
 namespace SqlScribe.HttpApiExample.Services;
 
@@ -72,15 +72,18 @@ public class BookService : IBookService
         }
     }
 
-    public async Task<IEnumerable<Book>> GetAllAsync()
+    public async Task<IEnumerable<BookResponse>> GetAllAsync()
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
 
         var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
-            .SelectAll()
+            .LeftJoin<Author, int?>(entity => entity.AuthorId, joined => joined.Id)
+            .Select(entity => new { entity.Id, entity.Title, entity.Genre, entity.Isbn, entity.Price })
+            .SelectWithMapping<Author, BookResponse, string?>(x => x.FirstName, y => y.AuthorFirstName)
+            .SelectWithMapping<Author, BookResponse, string?>(x => x.LastName, y => y.AuthorLastName)
             .Build();
 
-        return await conn.QueryAsync<Book>(query.Sql, query.Parameters);
+        return await conn.QueryAsync<BookResponse>(query.Sql, query.Parameters);
     }
 
     public async Task<IEnumerable<BookSlimResponse>> GetAllByPriceRangeAsync(decimal lowerBound, decimal upperBound,
@@ -101,7 +104,7 @@ public class BookService : IBookService
             cancellationToken: ct));
     }
 
-    public async Task<ValueOutcome<Book, IBadOutcome>> GetOneAsync(int id)
+    public async Task<ValueOutcome<BookResponse, IBadOutcome>> GetOneAsync(int id)
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -110,7 +113,7 @@ public class BookService : IBookService
             .Where(x => x.Id, SqlOperator.Equal, id)
             .Build();
 
-        var entity = await conn.QueryFirstOrDefaultAsync<Book>(query.Sql, query.Parameters);
+        var entity = await conn.QueryFirstOrDefaultAsync<BookResponse>(query.Sql, query.Parameters);
 
         if (entity is null)
         {

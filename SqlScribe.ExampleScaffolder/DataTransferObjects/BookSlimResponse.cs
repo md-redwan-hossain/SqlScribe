@@ -1,4 +1,4 @@
-namespace SqlScribe.HttpApiExample.DataTransferObjects;
+namespace SqlScribe.ExampleScaffolder.DataTransferObjects;
 
 public record BookSlimResponse
 {

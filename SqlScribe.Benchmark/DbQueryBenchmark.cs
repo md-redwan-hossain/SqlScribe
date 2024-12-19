@@ -4,13 +4,14 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using SqlKata.Compilers;
 using SqlKata.Execution;
-using SqlScribe.Enums;
+using SqlScribe.ExampleScaffolder.DataTransferObjects;
 using SqlScribe.ExampleScaffolder.Domain;
 using SqlScribe.ExampleScaffolder.Persistence;
 using SqlScribe.Factories;
 
 namespace SqlScribe.BenchMark;
 
+[MemoryDiagnoser]
 public class DbQueryBenchmark
 {
     private BookDbContext? _dbContext;
@@ -30,20 +31,35 @@ public class DbQueryBenchmark
     }
 
     [Benchmark]
-    public async Task<ICollection<Book>> GetWithEntityFramework()
+    public async Task<ICollection<BookResponse>> GetWithEntityFramework()
     {
         if (_dbContext is null)
         {
             return [];
         }
 
-        return await _dbContext.Books.Where(x => x.Id == 1)
+        var query = from book in _dbContext.Books
+            join authorTemp in _dbContext.Authors
+                on book.AuthorId equals authorTemp.Id into authorLeftJoin
+            from author in authorLeftJoin.DefaultIfEmpty()
+            select new BookResponse
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Isbn = book.Isbn,
+                Genre = book.Genre,
+                AuthorFirstName = author.FirstName,
+                AuthorLastName = author.LastName,
+                Price = book.Price
+            };
+
+        return await query
             .AsNoTracking()
             .ToListAsync();
     }
 
     [Benchmark]
-    public async Task<ICollection<Book>> GetWithSqlScribe()
+    public async Task<ICollection<BookResponse>> GetWithSqlScribe()
     {
         if (_dbConnection is null || _sqlQueryBuilderFactory is null)
         {
@@ -51,11 +67,38 @@ public class DbQueryBenchmark
         }
 
         var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
-            .SelectAll()
-            .Where(x => x.Id, SqlOperator.Equal, 1)
+            .LeftJoin<Author, int?>(entity => entity.AuthorId, joined => joined.Id)
+            .Select(entity => new { entity.Id, entity.Title, entity.Genre, entity.Isbn, entity.Price })
+            .SelectWithMapping<Author, BookResponse, string?>(x => x.FirstName, y => y.AuthorFirstName)
+            .SelectWithMapping<Author, BookResponse, string?>(x => x.LastName, y => y.AuthorLastName)
             .Build();
 
-        return (await _dbConnection.QueryAsync<Book>(query.Sql, query.Parameters)).ToList();
+        return (await _dbConnection.QueryAsync<BookResponse>(query.Sql, query.Parameters)).ToList();
+    }
+
+    [Benchmark]
+    public async Task<ICollection<BookResponse>> GetWithDapper()
+    {
+        if (_dbConnection is null || _sqlQueryBuilderFactory is null)
+        {
+            return [];
+        }
+
+        const string query = """
+                             SELECT
+                               "books"."id",
+                               "books"."title",
+                               "books"."genre",
+                               "books"."isbn",
+                               "books"."price",
+                               authors.first_name AS author_first_name,
+                               authors.last_name AS author_last_name
+                             FROM
+                               "books"
+                               INNER JOIN "authors" ON "authors"."id" = "books"."author_id" 
+                             """;
+
+        return (await _dbConnection.QueryAsync<BookResponse>(query)).ToList();
     }
 
     [Benchmark]
@@ -67,7 +110,12 @@ public class DbQueryBenchmark
         }
 
         var db = new QueryFactory(_dbConnection, _compiler);
-        return (await db.Query("books").Where("id", 1).GetAsync<Book>()).ToList();
+        return (await db.Query("books").Join("authors", "authors.id", "books.author_id")
+                .Select("books.id", "books.title", "books.genre", "books.isbn", "books.price")
+                .SelectRaw("authors.first_name AS author_first_name")
+                .SelectRaw("authors.last_name AS author_last_name")
+                .GetAsync<Book>())
+            .ToList();
     }
 
     [GlobalCleanup]

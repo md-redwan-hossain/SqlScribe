@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using SqlScribe.HttpApiExample.DataTransferObjects;
+using SqlScribe.ExampleScaffolder.DataTransferObjects;
 using SqlScribe.HttpApiExample.Services;
 
 namespace SqlScribe.HttpApiExample.Controllers;

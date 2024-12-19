@@ -43,11 +43,23 @@ public partial class SqlQueryBuilder<TEntity>
         return this;
     }
 
-    public SqlQueryBuilder<TEntity> Select<TSourceEntity, TDestinationEntity, TValue>(
+    public SqlQueryBuilder<TEntity> SelectWithMapping<TSourceEntity, TDestinationEntity, TValue>(
         Expression<Func<TSourceEntity, TValue>> sourceSelector,
         Expression<Func<TDestinationEntity, TValue>> destinationSelector)
     {
         var sourceTableName = GetTableName(typeof(TSourceEntity));
+        var sourceColumnName = ConvertName(ExtractPropertyName(sourceSelector), _namingConvention);
+        var destinationColumnName = ConvertName(ExtractPropertyName(destinationSelector), _namingConvention);
+
+        _selectQueue.Enqueue($"{sourceTableName}.{sourceColumnName} AS {destinationColumnName}");
+        return this;
+    }
+
+    public SqlQueryBuilder<TEntity> SelectWithMapping<TDestinationEntity, TValue>(
+        Expression<Func<TEntity, TValue>> sourceSelector,
+        Expression<Func<TDestinationEntity, TValue>> destinationSelector)
+    {
+        var sourceTableName = GetTableName(typeof(TEntity));
         var sourceColumnName = ConvertName(ExtractPropertyName(sourceSelector), _namingConvention);
         var destinationColumnName = ConvertName(ExtractPropertyName(destinationSelector), _namingConvention);
 

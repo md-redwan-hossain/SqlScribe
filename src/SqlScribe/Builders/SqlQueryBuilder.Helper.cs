@@ -75,7 +75,7 @@ public partial class SqlQueryBuilder<TEntity>
             UnaryExpression { Operand: MemberExpression unaryMember } => new[] { unaryMember.Member.Name },
             NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
                                            throw new Exception("No member found"),
-            _ => throw new InvalidOperationException("Invalid expression format.")
+            _ => throw new Exception("No member found")
         };
     }
 

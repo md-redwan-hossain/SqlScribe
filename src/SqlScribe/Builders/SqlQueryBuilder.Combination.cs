@@ -39,9 +39,9 @@ public partial class SqlQueryBuilder<TEntity>
         return this;
     }
 
-    public SqlQueryBuilder<TEntity> Join<TJoinedEntity, TEntityValue, TJoinedEntityValue>(SqlJoinType sqlJoinType,
-        Expression<Func<TEntity, TEntityValue>> entityKey,
-        Expression<Func<TJoinedEntity, TJoinedEntityValue>> joinedEntityKey)
+    public SqlQueryBuilder<TEntity> Join<TJoinedEntity, TValue>(SqlJoinType sqlJoinType,
+        Expression<Func<TEntity, TValue>> entityKey,
+        Expression<Func<TJoinedEntity, TValue>> joinedEntityKey)
     {
         var joinTypeString = sqlJoinType switch
         {
@@ -62,5 +62,33 @@ public partial class SqlQueryBuilder<TEntity>
         _joinQueue.Enqueue($" {joinTypeString} {toTable} ON {fromTable}.{fromColumn} = {toTable}.{toColumn} ");
 
         return this;
+    }
+
+    public SqlQueryBuilder<TEntity> LeftJoin<TJoinedEntity, TValue>(
+        Expression<Func<TEntity, TValue>> entityKey,
+        Expression<Func<TJoinedEntity, TValue>> joinedEntityKey)
+    {
+        return Join(SqlJoinType.Left, entityKey, joinedEntityKey);
+    }
+
+    public SqlQueryBuilder<TEntity> RightJoin<TJoinedEntity, TValue>(
+        Expression<Func<TEntity, TValue>> entityKey,
+        Expression<Func<TJoinedEntity, TValue>> joinedEntityKey)
+    {
+        return Join(SqlJoinType.Right, entityKey, joinedEntityKey);
+    }
+
+    public SqlQueryBuilder<TEntity> InnerJoin<TJoinedEntity, TValue>(
+        Expression<Func<TEntity, TValue>> entityKey,
+        Expression<Func<TJoinedEntity, TValue>> joinedEntityKey)
+    {
+        return Join(SqlJoinType.Inner, entityKey, joinedEntityKey);
+    }
+
+    public SqlQueryBuilder<TEntity> FullJoin<TJoinedEntity, TValue>(
+        Expression<Func<TEntity, TValue>> entityKey,
+        Expression<Func<TJoinedEntity, TValue>> joinedEntityKey)
+    {
+        return Join(SqlJoinType.Full, entityKey, joinedEntityKey);
     }
 }
