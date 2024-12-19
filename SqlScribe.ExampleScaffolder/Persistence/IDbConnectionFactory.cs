@@ -1,6 +1,6 @@
 using System.Data.Common;
 
-namespace SqlScribe.HttpApiExample.Data;
+namespace SqlScribe.ExampleScaffolder.Persistence;
 
 public interface IDbConnectionFactory
 {

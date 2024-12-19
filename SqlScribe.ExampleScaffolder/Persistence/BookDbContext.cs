@@ -1,8 +1,9 @@
 using System.Reflection;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using SqlScribe.ExampleScaffolder.Domain;
 
-namespace SqlScribe.HttpApiExample.Data;
+namespace SqlScribe.ExampleScaffolder.Persistence;
 
 public class BookDbContext(DbContextOptions<BookDbContext> options) : DbContext(options)
 {

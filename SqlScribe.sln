@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe", "src\SqlScribe\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.HttpApiExample", "src\SqlScribe.HttpApiExample\SqlScribe.HttpApiExample.csproj", "{BDE01713-791B-42F7-B24A-21E93939F77A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.Benchmark", "SqlScribe.Benchmark\SqlScribe.Benchmark.csproj", "{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlScribe.ExampleScaffolder", "SqlScribe.ExampleScaffolder\SqlScribe.ExampleScaffolder.csproj", "{A6C59347-D3B5-4952-91F0-D7BF1C236991}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{BDE01713-791B-42F7-B24A-21E93939F77A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BDE01713-791B-42F7-B24A-21E93939F77A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BDE01713-791B-42F7-B24A-21E93939F77A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8FE846C-386F-4A9D-A2F8-B8BEAB2F5449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6C59347-D3B5-4952-91F0-D7BF1C236991}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6C59347-D3B5-4952-91F0-D7BF1C236991}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6C59347-D3B5-4952-91F0-D7BF1C236991}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6C59347-D3B5-4952-91F0-D7BF1C236991}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

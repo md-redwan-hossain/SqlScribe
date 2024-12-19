@@ -1,6 +1,6 @@
 using SharpOutcome;
 using SharpOutcome.Helpers.Contracts;
-using SqlScribe.HttpApiExample.Data;
+using SqlScribe.ExampleScaffolder.Domain;
 using SqlScribe.HttpApiExample.DataTransferObjects;
 
 namespace SqlScribe.HttpApiExample.Services;

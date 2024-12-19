@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\SqlScribe.ExampleScaffolder\SqlScribe.ExampleScaffolder.csproj" />
       <ProjectReference Include="..\SqlScribe\SqlScribe.csproj" />
     </ItemGroup>
 

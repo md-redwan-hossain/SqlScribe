@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SqlScribe.ExampleScaffolder.Domain;
 
-namespace SqlScribe.HttpApiExample.Data;
+namespace SqlScribe.ExampleScaffolder.Persistence;
 
 public class BookConfig : IEntityTypeConfiguration<Book>
 {

@@ -1,7 +1,7 @@
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 
-namespace SqlScribe.HttpApiExample.Data;
+namespace SqlScribe.ExampleScaffolder.Persistence;
 
 public class SqliteConnectionFactory : IDbConnectionFactory
 {

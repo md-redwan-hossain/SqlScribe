@@ -6,8 +6,9 @@ using SharpOutcome.Helpers;
 using SharpOutcome.Helpers.Contracts;
 using SharpOutcome.Helpers.Enums;
 using SqlScribe.Enums;
+using SqlScribe.ExampleScaffolder.Domain;
+using SqlScribe.ExampleScaffolder.Persistence;
 using SqlScribe.Factories;
-using SqlScribe.HttpApiExample.Data;
 using SqlScribe.HttpApiExample.DataTransferObjects;
 
 namespace SqlScribe.HttpApiExample.Services;
@@ -74,9 +75,8 @@ public class BookService : IBookService
     public async Task<IEnumerable<Book>> GetAllAsync()
     {
         await using var conn = await _dbConnectionFactory.CreateConnectionAsync();
-        var qb = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>();
 
-        var query = qb
+        var query = _sqlQueryBuilderFactory.CreateSqlQueryBuilder<Book>()
             .SelectAll()
             .Build();
 

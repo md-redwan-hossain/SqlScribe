@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Scalar.AspNetCore;
 using SqlScribe.Enums;
+using SqlScribe.ExampleScaffolder.Persistence;
 using SqlScribe.Factories;
 using SqlScribe.HttpApiExample.Controllers;
-using SqlScribe.HttpApiExample.Data;
 using SqlScribe.HttpApiExample.Services;
 using SqlScribe.HttpApiExample.Utils;
 

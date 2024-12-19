@@ -1,4 +1,4 @@
-﻿namespace SqlScribe.HttpApiExample.Data;
+﻿namespace SqlScribe.ExampleScaffolder.Domain;
 
 public class Book
 {
