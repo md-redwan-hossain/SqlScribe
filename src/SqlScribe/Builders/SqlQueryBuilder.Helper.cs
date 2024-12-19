@@ -44,50 +44,47 @@ public partial class SqlQueryBuilder<TEntity>
         return ConvertName(tableName, _namingConvention);
     }
 
-    // private static string ExtractPropertyName<TValue>(Expression<Func<TEntity, TValue>> expression)
-    // {
-    //     return expression.Body switch
-    //     {
-    //         MemberExpression member => member.Member.Name,
-    //         UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
-    //         _ => throw new InvalidOperationException("Invalid expression format.")
-    //     };
-    // }
-
-    // private static IEnumerable<string> ExtractPropertyNames<TValue>(Expression<Func<TEntity, TValue>> expression)
-    // {
-    //     return expression.Body switch
-    //     {
-    //         MemberExpression member => [member.Member.Name],
-    //         UnaryExpression { Operand: MemberExpression unaryMember } => [unaryMember.Member.Name],
-    //         NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
-    //                                        throw new Exception("No member found"),
-    //         _ => throw new InvalidOperationException("Invalid expression format.")
-    //     };
-    // }
-
-
-    private static IEnumerable<string> ExtractPropertyNames(LambdaExpression expression)
+    private static IEnumerable<string> ExtractPropertyNames(Expression expression)
     {
-        return expression.Body switch
+        switch (expression)
         {
-            MemberExpression member => new[] { member.Member.Name },
-            UnaryExpression { Operand: MemberExpression unaryMember } => new[] { unaryMember.Member.Name },
-            NewExpression newExpression => newExpression.Members?.Select(m => m.Name) ??
-                                           throw new Exception("No member found"),
-            _ => throw new Exception("No member found")
-        };
+            case LambdaExpression lambdaExpression:
+                switch (lambdaExpression.Body)
+                {
+                    case MemberExpression member:
+                        return new[] { member.Member.Name };
+                    case UnaryExpression { Operand: MemberExpression unaryMember }:
+                        return new[] { unaryMember.Member.Name };
+                    case NewExpression newExpression:
+                        return newExpression.Members?.Select(m => m.Name) ??
+                               throw new Exception("No member found");
+                }
+
+                break;
+        }
+
+        throw new InvalidOperationException("Invalid expression format");
     }
 
-    private static string ExtractPropertyName(LambdaExpression expression)
+    private static string ExtractPropertyName(Expression expression)
     {
-        return expression.Body switch
+        switch (expression)
         {
-            MemberExpression member => member.Member.Name,
-            UnaryExpression { Operand: MemberExpression unaryMember } => unaryMember.Member.Name,
-            NewExpression => throw new Exception("Anonymous expression not allowed"),
-            _ => throw new InvalidOperationException("Invalid expression format.")
-        };
+            case LambdaExpression lambdaExpression:
+                switch (lambdaExpression.Body)
+                {
+                    case MemberExpression member:
+                        return member.Member.Name;
+                    case UnaryExpression { Operand: MemberExpression unaryMember }:
+                        return unaryMember.Member.Name;
+                    case NewExpression:
+                        throw new Exception("Anonymous expression is not allowed");
+                }
+
+                break;
+        }
+
+        throw new InvalidOperationException("Invalid expression format");
     }
 
     private string DelimitString(string text)
@@ -128,7 +125,6 @@ public partial class SqlQueryBuilder<TEntity>
             }
         }
 
-        // Trim the excess characters
         input.Length = writeIndex;
         return input;
     }

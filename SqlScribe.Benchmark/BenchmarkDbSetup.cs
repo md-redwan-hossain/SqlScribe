@@ -20,6 +20,7 @@ public static class BenchmarkDbSetup
     {
         var options = CreateDbContextOptions();
         using var dbContext = new BookDbContext(options);
+        dbContext.Database.EnsureDeleted();
         dbContext.Database.EnsureCreated();
     }
 

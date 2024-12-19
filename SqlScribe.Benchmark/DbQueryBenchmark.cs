@@ -77,9 +77,26 @@ public class DbQueryBenchmark
     }
 
     [Benchmark]
+    public async Task<ICollection<Book>> GetWithSqlKata()
+    {
+        if (_dbConnection is null || _compiler is null)
+        {
+            return [];
+        }
+
+        var db = new QueryFactory(_dbConnection, _compiler);
+        return (await db.Query("books").Join("authors", "authors.id", "books.author_id")
+                .Select("books.id", "books.title", "books.genre", "books.isbn", "books.price")
+                .SelectRaw("authors.first_name AS author_first_name")
+                .SelectRaw("authors.last_name AS author_last_name")
+                .GetAsync<Book>())
+            .ToList();
+    }
+
+    [Benchmark]
     public async Task<ICollection<BookResponse>> GetWithDapper()
     {
-        if (_dbConnection is null || _sqlQueryBuilderFactory is null)
+        if (_dbConnection is null)
         {
             return [];
         }
@@ -99,23 +116,6 @@ public class DbQueryBenchmark
                              """;
 
         return (await _dbConnection.QueryAsync<BookResponse>(query)).ToList();
-    }
-
-    [Benchmark]
-    public async Task<ICollection<Book>> GetWithSqlKata()
-    {
-        if (_dbConnection is null || _compiler is null)
-        {
-            return [];
-        }
-
-        var db = new QueryFactory(_dbConnection, _compiler);
-        return (await db.Query("books").Join("authors", "authors.id", "books.author_id")
-                .Select("books.id", "books.title", "books.genre", "books.isbn", "books.price")
-                .SelectRaw("authors.first_name AS author_first_name")
-                .SelectRaw("authors.last_name AS author_last_name")
-                .GetAsync<Book>())
-            .ToList();
     }
 
     [GlobalCleanup]

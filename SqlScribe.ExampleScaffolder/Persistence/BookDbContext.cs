@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Security.Cryptography;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using SqlScribe.ExampleScaffolder.Domain;
@@ -15,9 +14,9 @@ public class BookDbContext(DbContextOptions<BookDbContext> options) : DbContext(
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        var authorData = GenerateAuthorData();
+        var authorData = DataSeeder.GenerateAuthorData();
         modelBuilder.Entity<Author>().HasData(authorData);
-        modelBuilder.Entity<Book>().HasData(GenerateBookData(authorData));
+        modelBuilder.Entity<Book>().HasData(DataSeeder.GenerateBookData(authorData));
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
@@ -58,29 +57,5 @@ public class BookDbContext(DbContextOptions<BookDbContext> options) : DbContext(
                 foreignKey.SetConstraintName(foreignKey.GetConstraintName().Underscore().ToLowerInvariant());
             }
         }
-    }
-
-    private static List<Author> GenerateAuthorData()
-    {
-        return new Bogus.Faker<Author>()
-            .RuleFor(b => b.Id, f => f.IndexFaker + 1)
-            .RuleFor(b => b.FirstName, f => f.Lorem.Word())
-            .RuleFor(b => b.LastName, f => f.Lorem.Word())
-            .Generate(50);
-    }
-
-    private static List<Book> GenerateBookData(List<Author> authors)
-    {
-        List<string> genres = ["Fantasy", "Sci-Fi", "Mystery", "Romance", "Horror", "Non-fiction"];
-
-        return new Bogus.Faker<Book>()
-            .RuleFor(b => b.Id, f => f.IndexFaker + 1)
-            .RuleFor(b => b.Isbn, _ => Guid.NewGuid().ToString())
-            .RuleFor(b => b.Title, f => f.Lorem.Sentence(3))
-            .RuleFor(b => b.Genre, f => f.PickRandom(genres))
-            .RuleFor(b => b.AuthorId,
-                _ => authors.FirstOrDefault(x => x.Id == RandomNumberGenerator.GetInt32(1, 51))?.Id)
-            .RuleFor(b => b.Price, f => f.Random.Int(100, 1000))
-            .Generate(50);
     }
 }
